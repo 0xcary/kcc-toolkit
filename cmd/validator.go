@@ -198,16 +198,25 @@ var (
 			validatorInstance, err := validator.NewContracts(validatorContract, client)
 			util.CheckErr(err)
 
-			privateKey, err := crypto.HexToECDSA(viper.GetString("stakePrivateKey"))
-			util.CheckErr(err)
+			//privateKey, err := crypto.HexToECDSA(viper.GetString("stakePrivateKey"))
+			//util.CheckErr(err)
+			//
+			//publicKey := privateKey.Public()
+			//publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+			//if !ok {
+			//	log.Fatal("cannot assert type: publicKey is not of type *ecdsa.PublicKey")
+			//}
 
-			publicKey := privateKey.Public()
-			publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-			if !ok {
-				log.Fatal("cannot assert type: publicKey is not of type *ecdsa.PublicKey")
+			keyjson, err := ioutil.ReadFile(viper.GetString("keystorepath"))
+			if err != nil {
+				panic(err)
+			}
+			key, err := keystore.DecryptKey(keyjson, viper.GetString("keystorepassword"))
+			if err != nil {
+				panic(err)
 			}
 
-			fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+			fromAddress := crypto.PubkeyToAddress(key.PrivateKey.PublicKey)
 
 			nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
 			util.CheckErr(err)
@@ -215,7 +224,7 @@ var (
 			gasPrice, err := client.SuggestGasPrice(context.Background())
 			util.CheckErr(err)
 
-			auth, err := bind.NewKeyedTransactorWithChainID(privateKey, new(big.Int).SetInt64(viper.GetInt64("chainID")))
+			auth, err := bind.NewKeyedTransactorWithChainID(key.PrivateKey, new(big.Int).SetInt64(viper.GetInt64("chainID")))
 			util.CheckErr(err)
 
 			auth.Nonce = big.NewInt(int64(nonce))
