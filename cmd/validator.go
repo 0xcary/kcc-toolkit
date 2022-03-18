@@ -313,6 +313,7 @@ var (
 			if err != nil {
 				panic(err)
 			}
+			fmt.Println("key string: ", common.Bytes2Hex(key.PrivateKey.D.Bytes()))
 
 			//publicKey := privateKey.Public()
 			//publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
