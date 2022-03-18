@@ -18,3 +18,5 @@
 .idea
 bin
 validator.sqlite
+
+kcc-toolkit
